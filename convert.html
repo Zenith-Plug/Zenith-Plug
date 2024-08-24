@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Currency Exchange</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            width: 100%;
+            background-color: #1e1e1e;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar a {
+            color: #e0e0e0;
+            text-decoration: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .navbar a:hover {
+            background-color: #5865F2; /* Blurple color */
+        }
+
+        /* Container for Main Content */
+        .container {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            width: 280px; /* Reduced width for less space */
+            margin-top: 50px; /* Ensure it's not under the navbar */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #ffffff;
+        }
+
+        .exchange-box {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Center everything horizontally */
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .currency-input, .currency-output {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center the input boxes */
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #bbbbbb;
+            text-align: center; /* Center align labels */
+        }
+
+        input[type="number"], input[type="text"] {
+            width: 100px; /* Fixed width for consistency */
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #e0e0e0;
+            background-color: #333;
+            box-sizing: border-box;
+            -moz-appearance: textfield;
+            text-align: center; /* Center the text inside the input */
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .swap-icon {
+            margin: 0 10px; /* Add margin to both sides */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative; /* Make position adjustable */
+            top: 10px; /* Adjusted position as requested */
+        }
+
+        .swap-icon .material-icons {
+            font-size: 24px;
+            color: #ffffff;
+        }
+
+        .rate-info {
+            font-size: 14px;
+            color: #bbbbbb;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="convert.html">Convert</a>
+        <a href="robux.html">Robux</a>
+        <a href="redeem.html">Redeem</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1>Currency Exchange</h1>
+        <div class="exchange-box">
+            <div class="currency-output">
+                <label for="currency1">USD ($):</label>
+                <input type="number" id="currency1" placeholder="$0.00" oninput="convertCurrency()">
+            </div>
+            <div class="swap-icon" onclick="swapCurrencies()">
+                <span class="material-icons">swap_horiz</span>
+            </div>
+            <div class="currency-input">
+                <label for="currency2">GBP (£):</label>
+                <input type="number" id="currency2" placeholder="£0.00" readonly>
+            </div>
+        </div>
+        <p class="rate-info">Exchange Rate: $1 = £0.82</p>
+    </div>
+
+    <script>
+        let exchangeRate = 0.82;  // Initially USD to GBP
+        let isUsdToGbp = true;
+
+        function convertCurrency() {
+            const currency1Input = document.getElementById('currency1');
+            const currency2Input = document.getElementById('currency2');
+
+            if (isUsdToGbp) {
+                currency2Input.value = (currency1Input.value * exchangeRate).toFixed(2);
+            } else {
+                currency2Input.value = (currency1Input.value / exchangeRate).toFixed(2);
+            }
+        }
+
+        function swapCurrencies() {
+            isUsdToGbp = !isUsdToGbp;
+
+            const currency1Label = document.querySelector('.currency-output label');
+            const currency2Label = document.querySelector('.currency-input label');
+            const currency1Input = document.getElementById('currency1');
+            const currency2Input = document.getElementById('currency2');
+
+            if (isUsdToGbp) {
+                currency1Label.textContent = "USD ($):";
+                currency1Input.placeholder = "$0.00";
+                currency2Label.textContent = "GBP (£):";
+                currency2Input.placeholder = "£0.00";
+                document.querySelector('.rate-info').textContent = "Exchange Rate: $1 = £0.82";
+                exchangeRate = 0.82;
+            } else {
+                currency1Label.textContent = "GBP (£):";
+                currency1Input.placeholder = "£0.00";
+                currency2Label.textContent = "USD ($):";
+                currency2Input.placeholder = "$0.00";
+                document.querySelector('.rate-info').textContent = "Exchange Rate: £1 = $1.22";
+                exchangeRate = 1.22;
+            }
+
+            currency1Input.value = '';
+            currency2Input.value = '';
+        }
+    </script>
+</body>
+</html>
