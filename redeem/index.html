@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redeem a Key</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" type="image/png" href="https://i.imgur.com/9FjvJds.png">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(45deg, hsla(229, 71%, 11%, 1) 0%, hsla(0, 0%, 0%, 1) 49%, hsla(266, 79%, 11%, 1) 100%);
+            color: #e0e0e0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+        }
+
+        .navbar {
+            width: 100%;
+            background-color: #1e1e1e;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar a {
+            color: #e0e0e0;
+            text-decoration: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .navbar a:hover {
+            background-color: #7A19FF;
+        }
+
+        .container {
+            background-color: #1E1E1E;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.7);
+            text-align: center;
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 999;
+            transform: scale(0.8); 
+            opacity: 0;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+        }
+
+        .container.shrink {
+            transform: scale(0.8);
+            opacity: 0.5;
+        }
+
+        .container.expand {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+            font-size: 24px;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        p {
+            font-size: 14px;
+            color: #888888;
+            margin-bottom: 25px;
+        }
+
+        .redeem-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .redeem-box input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #555555;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #e0e0e0;
+            background-color: #1b1b1b;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        .redeem-box input[type="text"]::placeholder {
+            color: #6b6b6b;
+        }
+
+        .claim-button {
+            margin-top: 20px;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #7A19FF;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .claim-button:hover {
+            background-color: #6315CC;
+            box-shadow: 0px 0px 15px 5px rgba(122, 25, 255, 0.6);
+        }
+
+        .message {
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .message.success {
+            color: #28a745; 
+        }
+
+        .message.error {
+            color: #dc3545; 
+        }
+
+        .details-form {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .details-form input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #555555;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #e0e0e0;
+            background-color: #1b1b1b;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        .details-form input[type="text"]::placeholder {
+            color: #6b6b6b;
+        }
+
+        .submit-button {
+            margin-top: 20px;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #7A19FF;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .submit-button:hover {
+            background-color: #6315CC;
+            box-shadow: 0px 0px 15px 5px rgba(122, 25, 255, 0.6);
+        }
+
+        .icon-container {
+            position: fixed;
+            bottom: 20px;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .icon-container a {
+            margin: 0 10px;
+        }
+
+        .icon-container img {
+            width: 30px;
+            height: 30px;
+            transition: transform 0.3s ease;
+        }
+
+        .icon-container img:hover {
+            transform: scale(1.2);
+        }
+
+        .notification-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); 
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .notification-box {
+            background-color: #1b1b1b;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 1001;
+            width: 300px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        .notification-box h2 {
+            font-size: 20px;
+            color: #ffffff;
+        }
+
+        .notification-box p {
+            color: #cccccc;
+        }
+
+        .notification-box a {
+            color: #00b0ff;
+            text-decoration: none;
+        }
+
+        .notification-box a:hover {
+            color: #0099e6;
+        }
+
+        .close-button {
+		background-color: #7A19FF;
+		color: #ffffff;
+		border: none;
+		padding: 10px 20px;
+		border-radius: 5px;
+		cursor: pointer;
+		font-family: 'Poppins', sans-serif; 
+		font-size: 16px; 
+		transition: background-color 0.3s ease;
+	}
+
+        .close-button:hover {
+            background-color: #6315CC;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="/redeem">Redeem</a>
+        <a href="/usdrobux">Robux USD</a>
+        <a href="/gbprobux">Robux GBP</a>
+        <a href="/convert">Convert</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container" id="container">
+        <h1 id="title">Redeem Your Key</h1>
+        <p id="instructions">Enter your redemption key to claim your product.</p>
+        <div class="redeem-box" id="redeemBox">
+            <input type="text" id="key" placeholder="Enter a Key" autocomplete="off">
+            <button class="claim-button" onclick="redeemKey()">Claim</button>
+            <div id="message" class="message"></div>
+        </div>
+        <div class="details-form" id="detailsForm">
+            <input type="text" id="discordId" placeholder="Enter your Discord User ID" autocomplete="off">
+            <input type="text" id="sellAuthId" placeholder="Enter your Sell Auth Order ID" autocomplete="off">
+            <input type="text" id="gamePassLink" placeholder="Enter your Game Pass Link" autocomplete="off">
+            <button class="submit-button" onclick="submitDetails()">Submit</button>
+            <div id="submitMessage" class="message"></div>
+        </div>
+    </div>
+
+    <!-- Notification Overlay -->
+    <div id="notificationOverlay" class="notification-overlay">
+        <div class="notification-box">
+            <h2>Your Request has been submitted</h2>
+            <p>Please wait 24 hours for a response via Discord. <a href="https://discord.gg/zenithplug" target="_blank">zenithplug</a></p>
+            <button class="close-button" onclick="closeNotification()">Close</button>
+        </div>
+    </div>
+
+    <!-- Social Icons in Bottom Center -->
+    <div class="icon-container">
+        <a href="https://discord.gg/zenithplug" target="_blank">
+            <img src="https://i.imgur.com/PbBO2Mn.png" alt="Discord">
+        </a>
+        <a href="https://zenithplug.sellauth.com" target="_blank">
+            <img src="https://i.imgur.com/Z913OCP.png" alt="Shop">
+        </a>
+    </div>
+
+    <script>
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.keyCode === 123) { 
+                e.preventDefault();
+            }
+            if ((e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 67 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) {
+                e.preventDefault();
+            }
+        });
+
+        (function() {
+            const element = new Image();
+            Object.defineProperty(element, 'id', {
+                get: function() {
+                    window.location.href = 'about:blank';
+                }
+            });
+            console.log(element);
+        })();
+
+        document.addEventListener("visibilitychange", function() {
+            const container = document.getElementById('container');
+            if (document.hidden) {
+                container.classList.add('shrink');
+            } else {
+                container.classList.remove('shrink');
+                container.classList.add('expand');
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('container');
+            container.classList.add('expand');
+        });
+
+        async function redeemKey() {
+            const key = document.getElementById('key').value;
+            const messageDiv = document.getElementById('message');
+            const container = document.getElementById('container');
+            const redeemBox = document.getElementById('redeemBox');
+            const detailsForm = document.getElementById('detailsForm');
+            const title = document.getElementById('title');
+            const instructions = document.getElementById('instructions');
+
+            if (!key) {
+                messageDiv.textContent = "Please enter a key.";
+                messageDiv.className = "message error";
+                return;
+            }
+
+            try {
+                const response = await fetch('/redeem-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ key })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    messageDiv.textContent = "Key redeemed successfully!";
+                    messageDiv.className = "message success";
+                    
+                    container.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        title.textContent = "Fill In Your Details";
+                        instructions.textContent = "Please provide the following details to complete your redemption.";
+                        redeemBox.style.display = "none";
+                        detailsForm.style.display = "flex";
+                        container.style.transform = 'scale(1)';
+                    }, 500);
+                } else {
+                    messageDiv.textContent = result.message || "Failed to redeem key.";
+                    messageDiv.className = "message error";
+                }
+            } catch (error) {
+                messageDiv.textContent = "An error occurred. Please try again.";
+                messageDiv.className = "message error";
+            }
+        }
+
+        async function submitDetails() {
+            const discordId = document.getElementById('discordId').value;
+            const sellAuthId = document.getElementById('sellAuthId').value;
+            let gamePassLink = document.getElementById('gamePassLink').value; 
+            const submitMessage = document.getElementById('submitMessage');
+            const key = document.getElementById('key').value;
+
+            if (!discordId || !sellAuthId || !gamePassLink) {
+                submitMessage.textContent = "Please fill in all fields.";
+                submitMessage.className = "message error";
+                return;
+            }
+
+            const sellAuthIdPattern = /^[a-zA-Z0-9]{13}-\d{13}$/;
+            if (!sellAuthIdPattern.test(sellAuthId)) {
+                submitMessage.textContent = "Invalid Sell Auth Order ID.";
+                submitMessage.className = "message error";
+                return;
+            }
+
+            if (!gamePassLink.endsWith('/')) {
+                gamePassLink += '/'; 
+            }
+
+            const gamePassIdMatch = gamePassLink.match(/\/game-pass\/(\d+)\//);
+            if (!gamePassIdMatch) {
+                submitMessage.textContent = "Invalid Game Pass Link.";
+                submitMessage.className = "message error";
+                return;
+            }
+
+            const gamePassId = gamePassIdMatch[1];
+
+            try {
+                const response = await fetch(`/validate-gamepass`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ gamePassLink: gamePassId, userId: discordId, orderId: sellAuthId })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    const gamePassPriceInRobux = result.gamePassData.priceInRobux;
+
+                    const robuxValueMatch = key.match(/^(\d+)-R\$-/);
+                    if (!robuxValueMatch) {
+                        submitMessage.textContent = "Invalid key format.";
+                        submitMessage.className = "message error";
+                        return;
+                    }
+
+                    const keyRobuxValue = parseInt(robuxValueMatch[1]);
+
+                    if (gamePassPriceInRobux !== keyRobuxValue) {
+                        submitMessage.textContent = `Your game pass must be set to ${keyRobuxValue} Robux, not ${gamePassPriceInRobux} Robux.`;
+                        submitMessage.className = "message error";
+                    } else {
+                        submitMessage.textContent = "Details submitted successfully!";
+                        submitMessage.className = "message success";
+
+                        setTimeout(() => {
+                            openNotification();
+                        }, 1000);
+                    }
+                } else {
+                    submitMessage.textContent = result.message || "Failed to validate game pass.";
+                    submitMessage.className = "message error";
+                }
+            } catch (error) {
+                submitMessage.textContent = "An error occurred while validating the game pass.";
+                submitMessage.className = "message error";
+            }
+        }
+
+        function openNotification() {
+            document.getElementById('notificationOverlay').style.display = 'flex';
+        }
+
+        function closeNotification() {
+            document.getElementById('notificationOverlay').style.display = 'none';
+
+            document.body.style.pointerEvents = 'none';
+            setTimeout(() => {
+                document.body.style.pointerEvents = 'auto';
+            }, 2000);
+
+            document.getElementById('key').value = '';
+            document.getElementById('discordId').value = '';
+            document.getElementById('sellAuthId').value = '';
+            document.getElementById('gamePassLink').value = '';
+
+            const messageDiv = document.getElementById('message');
+            const submitMessage = document.getElementById('submitMessage');
+            const container = document.getElementById('container');
+            const redeemBox = document.getElementById('redeemBox');
+            const detailsForm = document.getElementById('detailsForm');
+            const title = document.getElementById('title');
+            const instructions = document.getElementById('instructions');
+
+            submitMessage.textContent = '';
+            messageDiv.textContent = '';
+
+            container.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                title.textContent = "Redeem Your Key";
+                instructions.textContent = "Enter your redemption key to claim your product.";
+                redeemBox.style.display = "flex";
+                detailsForm.style.display = "none";
+                container.style.transform = 'scale(1)';
+            }, 500);
+        }
+    </script>
+</body>
+</html>
