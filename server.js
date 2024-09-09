@@ -70,27 +70,29 @@ app.post('/redeem-key', async (req, res) => {
     const { key } = req.body;
     console.log('Redeem Key Request Body:', req.body);
 
-    const keys = await loadKeys();
+    const keys = await loadKeys();  // Load keys from 'keys.json'
 
     if (keys[key] !== "unused") {
         return res.status(400).send({ success: false, message: 'This key has already been used or is invalid.' });
     }
 
     if (keys[key]) {
+        // Mark the key as used
         keys[key] = 'used';
         await fs.writeFile('keys.json', JSON.stringify(keys, null, 2), 'utf-8');
 
+        // Extract Robux value from the key, assuming format is something like "12345-R$-examplekey"
         const robuxValueMatch = key.match(/^(\d+)-R\$-/);
         if (!robuxValueMatch) {
             return res.status(400).send({ success: false, message: 'Invalid key format.' });
         }
 
         const robuxValue = parseInt(robuxValueMatch[1]);
-        redeemedKeys.set(req.ip, robuxValue);
+        redeemedKeys.set(req.ip, robuxValue);  // Store the robux value for the requester's IP
 
-        res.send({ success: true, message: 'Key redeemed successfully!' });
+        return res.send({ success: true, message: 'Key redeemed successfully!' });
     } else {
-        res.status(400).send({ success: false, message: 'Invalid key.' });
+        return res.status(400).send({ success: false, message: 'Invalid key.' });
     }
 });
 
@@ -101,16 +103,18 @@ app.post('/validate-gamepass', async (req, res) => {
     console.log('GamePassLink:', gamePassLink);
     console.log('Received userId:', userId);
 
-    const robuxValue = redeemedKeys.get(req.ip);
+    const robuxValue = redeemedKeys.get(req.ip);  // Retrieve Robux value from redeemedKeys map
     console.log('Retrieved Robux Value:', robuxValue);
 
     const ip_address = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
 
+    // Check if the userId is a valid Discord ID (18-19 digits)
     if (!userId || !/^\d{18,19}$/.test(userId)) {
         console.error('Invalid Discord User ID');
         return res.status(400).send({ success: false, message: 'Invalid Discord User ID. Please enter a valid user ID.' });
     }
 
+    // Check if a key has been redeemed by this IP
     if (!robuxValue) {
         return res.status(400).send({ success: false, message: "No key found for this session. Please redeem a key first." });
     }
@@ -120,6 +124,7 @@ app.post('/validate-gamepass', async (req, res) => {
         return res.status(400).send({ success: false, message: "Game Pass Link is required." });
     }
 
+    // Check if the orderId has already been used
     const usedOrderIds = await loadUsedOrderIds();
     if (usedOrderIds.includes(orderId)) {
         return res.status(400).send({ success: false, message: 'This order ID has already been used.' });
@@ -141,12 +146,13 @@ app.post('/validate-gamepass', async (req, res) => {
                 return res.status(400).send({ success: false, message: "Failed to retrieve the correct price from the game pass." });
             }
 
+            // Compare the game pass price with the Robux value from the redeemed key
             if (gamePassPriceInRobux !== robuxValue) {
                 return res.status(400).send({ success: false, message: `Your game pass must be set to ${robuxValue} Robux, not ${gamePassPriceInRobux} Robux.` });
             }
 
             usedOrderIds.push(orderId);
-            await saveUsedOrderIds(usedOrderIds);
+            await saveUsedOrderIds(usedOrderIds);  // Save the orderId to prevent reuse
 
             res.status(200).send({ success: true, message: "Details submitted successfully!", gamePassData: { priceInRobux: gamePassPriceInRobux } });
 
