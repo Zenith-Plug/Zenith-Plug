@@ -1,3 +1,16 @@
-node_modules/
-.env
+# Logs
+logs
 *.log
+npm-debug.log*
+
+# Dependency directories
+node_modules/
+
+# Environment variables
+.env
+
+# Optional npm cache directory
+.npm
+
+# Miscellaneous
+.DS_Store
