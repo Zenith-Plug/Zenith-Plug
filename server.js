@@ -10,6 +10,12 @@ const { Client, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ActionRowBuilder
 dotenv.config();
 
 const app = express();
+
+app.use(cors({
+    origin: 'https://www.zenithplug.com', // Replace with your custom GitHub Pages domain
+    methods: ['GET', 'POST'], // Allowed HTTP methods
+}));
+
 const PORT = process.env.PORT || 8000;
 
 app.use(express.json());
