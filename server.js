@@ -4,28 +4,20 @@ import fs from 'fs/promises';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import pkg from 'discord.js';
-import cors from 'cors'; 
 
 const { Client, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = pkg;
 
 dotenv.config();
 
 const app = express();
-
-app.use(cors({
-    origin: 'https://www.zenithplug.com', // Replace with your custom GitHub Pages domain
-    methods: ['GET', 'POST'], // Allowed HTTP methods
-}));
-
 const PORT = process.env.PORT || 8000;
 
 app.use(express.json());
 
-app.set('trust proxy', true);
-
 const redeemedKeys = new Map();
 const usedOrderIdsFilePath = path.join(process.cwd(), 'usedOrderIds.json');
 
+// Initialize Discord Client
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -40,6 +32,7 @@ client.once('ready', () => {
 
 client.login(process.env.DISCORD_BOT_TOKEN);
 
+// Serve static files
 app.use('/redeem', express.static(path.join(process.cwd(), 'redeem')));
 app.use('/convert', express.static(path.join(process.cwd(), 'convert')));
 app.use('/gbprobux', express.static(path.join(process.cwd(), 'gbprobux')));
@@ -50,6 +43,7 @@ app.get('/', (req, res) => {
     res.redirect('/welcome');
 });
 
+// Load used order IDs from JSON file
 async function loadUsedOrderIds() {
     try {
         const data = await fs.readFile(usedOrderIdsFilePath, 'utf-8');
@@ -60,6 +54,7 @@ async function loadUsedOrderIds() {
     }
 }
 
+// Save used order IDs to JSON file
 async function saveUsedOrderIds(orderIds) {
     try {
         await fs.writeFile(usedOrderIdsFilePath, JSON.stringify(orderIds, null, 2), 'utf-8');
@@ -68,11 +63,13 @@ async function saveUsedOrderIds(orderIds) {
     }
 }
 
+// Load keys from JSON file
 async function loadKeys() {
     const data = await fs.readFile('keys.json', 'utf-8');
     return JSON.parse(data);
 }
 
+// Redeem key endpoint
 app.post('/redeem-key', async (req, res) => {
     const { key } = req.body;
     console.log('Redeem Key Request Body:', req.body);
@@ -101,6 +98,7 @@ app.post('/redeem-key', async (req, res) => {
     }
 });
 
+// Validate Game Pass and User ID
 app.post('/validate-gamepass', async (req, res) => {
     const { gamePassLink, userId, orderId } = req.body;
 
@@ -111,7 +109,8 @@ app.post('/validate-gamepass', async (req, res) => {
     const robuxValue = redeemedKeys.get(req.ip);
     console.log('Retrieved Robux Value:', robuxValue);
 
-    const ip_address = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
+    // Capture the user's IP address
+    const ip_address = req.headers['x-forwarded-for'] || req.ip;
 
     if (!userId || !/^\d{18,19}$/.test(userId)) {
         console.error('Invalid Discord User ID');
@@ -127,19 +126,14 @@ app.post('/validate-gamepass', async (req, res) => {
         return res.status(400).send({ success: false, message: "Game Pass Link is required." });
     }
 
+    // Load used order IDs and check if this orderId has been used before
     const usedOrderIds = await loadUsedOrderIds();
     if (usedOrderIds.includes(orderId)) {
         return res.status(400).send({ success: false, message: 'This order ID has already been used.' });
     }
 
     try {
-        // Extract the numeric game pass ID from the full URL
-        const gamePassIdMatch = gamePassLink.match(/\/game-pass\/(\d+)\//);
-        if (!gamePassIdMatch) {
-            return res.status(400).send({ success: false, message: "Invalid Game Pass Link." });
-        }
-        const gamePassId = gamePassIdMatch[1];  // Extract the ID
-
+        const gamePassId = gamePassLink.trim();
         const apiUrl = `https://apis.roblox.com/game-passes/v1/game-passes/${gamePassId}/product-info`;
 
         const apiResponse = await fetch(apiUrl);
@@ -158,11 +152,13 @@ app.post('/validate-gamepass', async (req, res) => {
                 return res.status(400).send({ success: false, message: `Your game pass must be set to ${robuxValue} Robux, not ${gamePassPriceInRobux} Robux.` });
             }
 
+            // Add the new orderId to the usedOrderIds list and save
             usedOrderIds.push(orderId);
             await saveUsedOrderIds(usedOrderIds);
 
             res.status(200).send({ success: true, message: "Details submitted successfully!", gamePassData: { priceInRobux: gamePassPriceInRobux } });
 
+            // Call notification function and pass the IP address
             await send_order_notification(userId, robuxValue, orderId, gamePassId, ip_address);
 
         } else {
@@ -178,13 +174,13 @@ async function send_order_notification(user_id, robux_value, order_id, game_pass
     try {
         const embed = new EmbedBuilder()
             .setTitle("ORDER")
-            .setColor(0x28a745) 
+            .setColor(0x28a745) // Softer green color
             .addFields(
-                { name: "**CUSTOMER:**", value: `<@${user_id}>` }, 
+                { name: "**CUSTOMER:**", value: `<@${user_id}>` }, // Ensure customer is always included
                 { name: "**ORDER:**", value: `${robux_value} R$` },
                 { name: "**ORDER-ID:**", value: `${order_id}` },
                 { name: "**GAMEPASS:**", value: `[Buy here](https://www.roblox.com/game-pass/${game_pass_id}/)` },
-                { name: "**IP ADDRESS:**", value: `${ip_address}` }, 
+                { name: "**IP ADDRESS:**", value: `${ip_address}` }, // Include IP address here
                 { name: "**STATUS:**", value: "Awaiting confirmation by <@981252386876174336>" }
             );
 
@@ -199,22 +195,11 @@ async function send_order_notification(user_id, robux_value, order_id, game_pass
         }
 
         const admin = await client.users.fetch('981252386876174336');
-        const completeButton = new ButtonBuilder()
-            .setCustomId('confirm_order')
-            .setLabel('Complete')  
-            .setStyle(ButtonStyle.Success);
+        const confirmButton = new ButtonBuilder().setCustomId('confirm_order').setLabel('Confirm').setStyle(ButtonStyle.Success);
+        const holdButton = new ButtonBuilder().setCustomId('hold_order').setLabel('Hold').setStyle(ButtonStyle.Primary);
+        const denyButton = new ButtonBuilder().setCustomId('deny_order').setLabel('Denied').setStyle(ButtonStyle.Danger);
 
-        const holdButton = new ButtonBuilder()
-            .setCustomId('hold_order')
-            .setLabel('Hold')
-            .setStyle(ButtonStyle.Primary);
-
-        const denyButton = new ButtonBuilder()
-            .setCustomId('deny_order')
-            .setLabel('Deny')  
-            .setStyle(ButtonStyle.Danger);
-
-        const actionRow = new ActionRowBuilder().addComponents(completeButton, holdButton, denyButton);
+        const actionRow = new ActionRowBuilder().addComponents(confirmButton, holdButton, denyButton);
 
         await admin.send({ embeds: [embed], components: [actionRow] });
 
@@ -224,13 +209,13 @@ async function send_order_notification(user_id, robux_value, order_id, game_pass
     }
 }
 
-
 client.on('interactionCreate', async interaction => {
     try {
         if (!interaction.isButton()) return;
 
+        // Handle Remind button
         if (interaction.customId === 'remind_customer') {
-            const customerMention = interaction.message.content.match(/<@(\d+)>/); 
+            const customerMention = interaction.message.content.match(/<@(\d+)>/); // Extract customer ID from the message content
             const userId = customerMention ? customerMention[1] : null;
 
             if (!userId) {
@@ -238,6 +223,7 @@ client.on('interactionCreate', async interaction => {
                 return interaction.reply({ content: 'Customer ID not found.', ephemeral: true });
             }
 
+            // Send vouch reminder to the customer
             const customer = await client.users.fetch(userId);
             const vouchReminder = `<@${userId}> This is an automatic reminder for you to **vouch for your purchase**.`;
 
@@ -248,16 +234,18 @@ client.on('interactionCreate', async interaction => {
                 console.error(`Error sending reminder to customer ${userId}: ${err.message}`);
                 await interaction.reply({ content: 'Failed to send reminder to the customer.', ephemeral: true });
             }
-            return; 
+            return; // Exit here since we don't need the rest of the logic for other buttons
         }
 
         const embed = interaction.message.embeds[0];
 
+        // Check if embed and embed fields exist
         if (!embed || !embed.fields) {
             console.error('No embed or embed fields found in the interaction message');
             return interaction.reply({ content: 'An error occurred. Embed data is missing.', ephemeral: true });
         }
 
+        // Find the **ORDER:** field safely
         const orderField = embed.fields.find(f => f.name === '**ORDER:**');
         if (!orderField) {
             console.error('No **ORDER:** field found in the embed');
@@ -266,12 +254,13 @@ client.on('interactionCreate', async interaction => {
 
         const robuxValue = orderField.value.replace(' R$', '');
 
+        // Handling Confirm Order
         if (interaction.customId === 'confirm_order') {
             const userId = embed.fields.find(f => f.name === '**CUSTOMER:**').value.replace(/<@|>/g, '');
 
             const confirmedEmbed = new EmbedBuilder()
                 .setTitle('ORDER COMPLETED')
-                .setColor(0x28a745) 
+                .setColor(0x28a745) // Green color
                 .addFields(
                     { name: '**CUSTOMER:**', value: `<@${userId}>` },
                     { name: '**ORDER:**', value: `${robuxValue} R$` },
@@ -283,33 +272,37 @@ client.on('interactionCreate', async interaction => {
             const customer = await client.users.fetch(userId);
             await customer.send({ embeds: [confirmedEmbed] });
 
-            const priceInUSD = (robuxValue / 1000) * 4.1; 
+            // Send vouch requirements after order confirmation
+            const priceInUSD = (robuxValue / 1000) * 4.1; // Auto-calculate cost based on 1000 Robux = $4.10
             const vouchEmbed = new EmbedBuilder()
                 .setTitle('VOUCH REQUIREMENTS')
-                .setColor(0x5865F2) 
+                .setColor(0x5865F2) // Blurple color
                 .setDescription(`\`+rep <@981252386876174336> bought ${robuxValue} R$ | PayPal $${priceInUSD.toFixed(2)} USD\`\nWith a screenshot of your __pending__ robux\n<#1209285252195811342>`);
 
             await customer.send({ embeds: [vouchEmbed] });
 
+            // Create "Remind" button after order confirmation
             const remindButton = new ButtonBuilder()
                 .setCustomId('remind_customer')
                 .setLabel('Remind')
-                .setStyle(ButtonStyle.Primary); 
+                .setStyle(ButtonStyle.Primary); // Blurple color
 
             const actionRow = new ActionRowBuilder().addComponents(remindButton);
 
+            // Send message to admin with "Send vouch reminder" and Remind button
             await interaction.reply({
                 content: `Send <@${userId}> a vouch reminder?`,
                 components: [actionRow],
-                ephemeral: false 
+                ephemeral: false // Makes the reminder visible to everyone
             });
 
+        // Handling Deny Order
         } else if (interaction.customId === 'deny_order') {
             const userId = embed.fields.find(f => f.name === '**CUSTOMER:**').value.replace(/<@|>/g, '');
 
             const denyEmbed = new EmbedBuilder()
-                .setTitle('ORDER DENIED')
-                .setColor(0xFF0000) 
+                .setTitle('ROBUX ORDER DENIED')
+                .setColor(0xFF0000) // Red color
                 .addFields(
                     { name: '**CUSTOMER:**', value: `<@${userId}>` },
                     { name: '**ORDER:**', value: `${robuxValue} R$` },
@@ -323,12 +316,13 @@ client.on('interactionCreate', async interaction => {
 
             await interaction.reply({ content: 'Order has been denied!', ephemeral: true });
 
+        // Handling Hold Order
         } else if (interaction.customId === 'hold_order') {
             const userId = embed.fields.find(f => f.name === '**CUSTOMER:**').value.replace(/<@|>/g, '');
 
             const holdEmbed = new EmbedBuilder()
                 .setTitle('ORDER ON HOLD')
-                .setColor(0xFFA500) 
+                .setColor(0xFFA500) // Orange color
                 .addFields(
                     { name: '**CUSTOMER:**', value: `<@${userId}>` },
                     { name: '**ORDER:**', value: `${robuxValue} R$` },
@@ -353,7 +347,11 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
 });
 
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});
