@@ -70,7 +70,7 @@ async function loadKeys() {
 }
 
 // Redeem key endpoint
-app.post('/redeem-key', async (req, res) => {
+app.post('https://zenith-plug.onrender.com/redeem-key', async (req, res) => {
     const { key } = req.body;
     console.log('Redeem Key Request Body:', req.body);
 
@@ -99,7 +99,7 @@ app.post('/redeem-key', async (req, res) => {
 });
 
 // Validate Game Pass and User ID
-app.post('/validate-gamepass', async (req, res) => {
+app.post('https://zenith-plug.onrender.com/validate-gamepass', async (req, res) => {
     const { gamePassLink, userId, orderId } = req.body;
 
     console.log('Request received at /validate-gamepass');
