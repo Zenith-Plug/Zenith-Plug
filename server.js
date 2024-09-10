@@ -4,6 +4,7 @@ import fs from 'fs/promises';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import pkg from 'discord.js';
+import cors from 'cors'; 
 
 const { Client, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = pkg;
 
