@@ -183,7 +183,8 @@ app.post('/validate-gamepass', async (req, res) => {
 
 async function send_order_notification(user_id, robux_value, order_id, game_pass_id, ip_address) {
     try {
-        const embed = new EmbedBuilder()
+        // Embed for the customer (no IP address)
+        const customerEmbed = new EmbedBuilder()
             .setTitle("ORDER")
             .setColor(0x28a745)
             .addFields(
@@ -191,19 +192,31 @@ async function send_order_notification(user_id, robux_value, order_id, game_pass
                 { name: "**ORDER:**", value: `${robux_value} R$` },
                 { name: "**ORDER-ID:**", value: `${order_id}` },
                 { name: "**GAMEPASS:**", value: `[Buy here](https://www.roblox.com/game-pass/${game_pass_id}/)` },
-                { name: "**IP ADDRESS:**", value: `${ip_address}` },
                 { name: "**STATUS:**", value: "Awaiting confirmation by <@981252386876174336>" }
             );
 
         const customer = await client.users.fetch(user_id);
 
         try {
-            await customer.send({ embeds: [embed] });
+            await customer.send({ embeds: [customerEmbed] });
             console.log(`Message sent to user: ${customer.tag}`);
         } catch (err) {
             console.error(`Error sending message to user ${user_id}: ${err.message}`);
             throw new Error("Cannot send messages to this user");
         }
+
+        // Embed for the admin (with IP address)
+        const adminEmbed = new EmbedBuilder()
+            .setTitle("ORDER")
+            .setColor(0x28a745)
+            .addFields(
+                { name: "**CUSTOMER:**", value: `<@${user_id}>` },
+                { name: "**ORDER:**", value: `${robux_value} R$` },
+                { name: "**ORDER-ID:**", value: `${order_id}` },
+                { name: "**GAMEPASS:**", value: `[Buy here](https://www.roblox.com/game-pass/${game_pass_id}/)` },
+                { name: "**IP ADDRESS:**", value: `${ip_address}` },  // Only shown to the admin
+                { name: "**STATUS:**", value: "Awaiting confirmation by <@981252386876174336>" }
+            );
 
         const admin = await client.users.fetch('981252386876174336');
         const confirmButton = new ButtonBuilder().setCustomId('confirm_order').setLabel('Confirm').setStyle(ButtonStyle.Success);
@@ -212,13 +225,16 @@ async function send_order_notification(user_id, robux_value, order_id, game_pass
 
         const actionRow = new ActionRowBuilder().addComponents(confirmButton, holdButton, denyButton);
 
-        await admin.send({ embeds: [embed], components: [actionRow] });
+        await admin.send({ embeds: [adminEmbed], components: [actionRow] });
 
     } catch (error) {
         console.error(`Error sending order notification: ${error.message}`);
         throw error;
     }
 }
+
+// Get the first IP from the x-forwarded-for header, or the direct IP
+const ip_address = (req.headers['x-forwarded-for'] || req.ip).split(',')[0].trim();
 
 client.on('interactionCreate', async interaction => {
     try {
