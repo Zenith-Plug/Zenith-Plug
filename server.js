@@ -17,7 +17,6 @@ app.use(express.json());
 const redeemedKeys = new Map();
 const usedOrderIdsFilePath = path.join(process.cwd(), 'usedOrderIds.json');
 
-// Initialize Discord Client
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -32,7 +31,6 @@ client.once('ready', () => {
 
 client.login(process.env.DISCORD_BOT_TOKEN);
 
-// Serve static files
 app.use('/redeem', express.static(path.join(process.cwd(), 'redeem')));
 app.use('/convert', express.static(path.join(process.cwd(), 'convert')));
 app.use('/gbprobux', express.static(path.join(process.cwd(), 'gbprobux')));
@@ -43,7 +41,6 @@ app.get('/', (req, res) => {
     res.redirect('/welcome');
 });
 
-// Load used order IDs from JSON file
 async function loadUsedOrderIds() {
     try {
         const data = await fs.readFile(usedOrderIdsFilePath, 'utf-8');
@@ -54,7 +51,6 @@ async function loadUsedOrderIds() {
     }
 }
 
-// Save used order IDs to JSON file
 async function saveUsedOrderIds(orderIds) {
     try {
         await fs.writeFile(usedOrderIdsFilePath, JSON.stringify(orderIds, null, 2), 'utf-8');
@@ -63,7 +59,6 @@ async function saveUsedOrderIds(orderIds) {
     }
 }
 
-// Load keys from JSON file
 async function loadKeys() {
     try {
         const data = await fs.readFile('keys.json', 'utf-8');
@@ -74,7 +69,6 @@ async function loadKeys() {
     }
 }
 
-// Redeem key endpoint
 app.post('/redeem-key', async (req, res) => {
     try {
         const { key } = req.body;
@@ -108,7 +102,6 @@ app.post('/redeem-key', async (req, res) => {
     }
 });
 
-// Validate Game Pass and User ID
 app.post('/validate-gamepass', async (req, res) => {
     try {
         const { gamePassLink, userId, orderId } = req.body;
@@ -183,7 +176,6 @@ app.post('/validate-gamepass', async (req, res) => {
 
 async function send_order_notification(user_id, robux_value, order_id, game_pass_id, ip_address) {
     try {
-        // Embed for the customer (no IP address)
         const customerEmbed = new EmbedBuilder()
             .setTitle("ORDER")
             .setColor(0x28a745)
@@ -205,7 +197,6 @@ async function send_order_notification(user_id, robux_value, order_id, game_pass
             throw new Error("Cannot send messages to this user");
         }
 
-        // Embed for the admin (with IP address)
         const adminEmbed = new EmbedBuilder()
             .setTitle("ORDER")
             .setColor(0x28a745)
@@ -214,7 +205,7 @@ async function send_order_notification(user_id, robux_value, order_id, game_pass
                 { name: "**ORDER:**", value: `${robux_value} R$` },
                 { name: "**ORDER-ID:**", value: `${order_id}` },
                 { name: "**GAMEPASS:**", value: `[Buy here](https://www.roblox.com/game-pass/${game_pass_id}/)` },
-                { name: "**IP ADDRESS:**", value: `${ip_address}` },  // Only shown to the admin
+                { name: "**IP ADDRESS:**", value: `${ip_address}` },
                 { name: "**STATUS:**", value: "Awaiting confirmation by <@981252386876174336>" }
             );
 
