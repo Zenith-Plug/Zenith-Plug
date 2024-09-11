@@ -326,8 +326,14 @@
     </div>
 
     <script>
-	
-		window.location.href = "https://zenith-plug.onrender.com/redeem";
+        // Get the current URL
+        const currentUrl = window.location.href;
+
+        // Check if the user is on zenithplug.com/redeem and not already on zenith-plug.onrender.com
+        if (currentUrl.includes("zenithplug.com/redeem") && !currentUrl.includes("zenith-plug.onrender.com")) {
+            // Redirect to the Render backend's redeem page
+            window.location.href = "https://zenith-plug.onrender.com/redeem";
+        }
 
         // Disable right-click
         document.addEventListener('contextmenu', function(e) {
@@ -388,7 +394,7 @@
             }
 
             try {
-                const response = await fetch('/redeem-key', {
+                const response = await fetch('https://zenith-plug.onrender.com/redeem-key', {  // Absolute URL for backend request
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -458,7 +464,7 @@
             const gamePassId = gamePassIdMatch[1];
 
             try {
-                const response = await fetch(`/validate-gamepass`, {
+                const response = await fetch('https://zenith-plug.onrender.com/validate-gamepass', { // Absolute URL for backend request
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
