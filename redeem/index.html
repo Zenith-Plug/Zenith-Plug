@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="icon" type="image/png" href="https://i.imgur.com/9FjvJds.png">
     <style>
-        /* Main Body and Background */
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(45deg, hsla(229, 71%, 11%, 1) 0%, hsla(0, 0%, 0%, 1) 49%, hsla(266, 79%, 11%, 1) 100%);
@@ -23,7 +22,6 @@
             transition: transform 0.5s ease, opacity 0.5s ease;
         }
 
-        /* Navbar Styles */
         .navbar {
             width: 100%;
             background-color: #1e1e1e;
@@ -50,7 +48,6 @@
             background-color: #7A19FF;
         }
 
-        /* Container for Main Content */
         .container {
             background-color: #1E1E1E;
             padding: 30px;
@@ -90,7 +87,6 @@
             margin-bottom: 25px;
         }
 
-        /* Redeem Key Box */
         .redeem-box {
             display: flex;
             flex-direction: column;
@@ -135,7 +131,6 @@
             box-shadow: 0px 0px 15px 5px rgba(122, 25, 255, 0.6);
         }
 
-        /* Message Styles */
         .message {
             margin-top: 15px;
             font-size: 16px;
@@ -150,7 +145,6 @@
             color: #dc3545; /* Red color for error */
         }
 
-        /* Hidden form initially */
         .details-form {
             display: none;
             flex-direction: column;
@@ -195,7 +189,6 @@
             box-shadow: 0px 0px 15px 5px rgba(122, 25, 255, 0.6);
         }
 
-        /* Social Icons in Bottom Center */
         .icon-container {
             position: fixed;
             bottom: 20px;
@@ -219,7 +212,6 @@
             transform: scale(1.2);
         }
 
-        /* Notification Box Styles */
         .notification-overlay {
             display: none;
             position: fixed;
@@ -280,7 +272,6 @@
 </head>
 <body>
 
-	<!-- Navbar -->
 	<div class="navbar">
 		<a href="https://zenithplug.com/redeem">Redeem</a>
 		<a href="https://zenithplug.com/usdrobux">Robux USD</a>
@@ -288,7 +279,6 @@
 		<a href="https://zenithplug.com/convert">Convert</a>
 	</div>
 
-    <!-- Main Content -->
     <div class="container" id="container">
         <h1 id="title">Redeem Your Key</h1>
         <p id="instructions">Enter your redemption key to claim your product.</p>
@@ -306,7 +296,6 @@
         </div>
     </div>
 
-    <!-- Notification Overlay -->
     <div id="notificationOverlay" class="notification-overlay">
         <div class="notification-box">
             <h2>Your Request has been submitted</h2>
@@ -315,7 +304,6 @@
         </div>
     </div>
 
-    <!-- Social Icons in Bottom Center -->
     <div class="icon-container">
         <a href="https://discord.gg/zenithplug" target="_blank">
             <img src="https://i.imgur.com/PbBO2Mn.png" alt="Discord">
@@ -326,21 +314,17 @@
     </div>
 
     <script>
-        // Get the current URL
         const currentUrl = window.location.href;
 
-        // Check if the user is on zenithplug.com/redeem and not already on zenith-plug.onrender.com
         if (currentUrl.includes("zenithplug.com/redeem") && !currentUrl.includes("zenith-plug.onrender.com")) {
             // Redirect to the Render backend's redeem page
             window.location.href = "https://zenith-plug.onrender.com/redeem";
         }
 
-        // Disable right-click
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
         });
 
-        // Disable F12, Ctrl+Shift+I, Ctrl+Shift+C, Ctrl+Shift+J, and Ctrl+U
         document.addEventListener('keydown', function(e) {
             if (e.keyCode === 123) { // F12
                 e.preventDefault();
@@ -350,7 +334,6 @@
             }
         });
 
-        // Disable Developer Tools on Inspect Element Trigger
         (function() {
             const element = new Image();
             Object.defineProperty(element, 'id', {
@@ -361,7 +344,6 @@
             console.log(element);
         })();
 
-        // Visibility change shrink/expand logic
         document.addEventListener("visibilitychange", function() {
             const container = document.getElementById('container');
             if (document.hidden) {
@@ -372,7 +354,6 @@
             }
         });
 
-        // Initial expand animation when page loads
         window.addEventListener('DOMContentLoaded', function() {
             const container = document.getElementById('container');
             container.classList.add('expand');
@@ -440,7 +421,6 @@
                 return;
             }
 
-            // Validate Sell Auth Order ID
             const sellAuthIdPattern = /^[a-zA-Z0-9]{13}-\d{13}$/;
             if (!sellAuthIdPattern.test(sellAuthId)) {
                 submitMessage.textContent = "Invalid Sell Auth Order ID.";
@@ -448,12 +428,10 @@
                 return;
             }
 
-            // Ensure the Game Pass link has a trailing slash (invisible to the user)
             if (!gamePassLink.endsWith('/')) {
                 gamePassLink += '/'; // Add slash if missing
             }
 
-            // Extract Game Pass ID from the URL
             const gamePassIdMatch = gamePassLink.match(/\/game-pass\/(\d+)\//);
             if (!gamePassIdMatch) {
                 submitMessage.textContent = "Invalid Game Pass Link.";
@@ -477,7 +455,6 @@
                 if (result.success) {
                     const gamePassPriceInRobux = result.gamePassData.priceInRobux;
 
-                    // Extract the Robux value from the key
                     const robuxValueMatch = key.match(/^(\d+)-R\$-/);
                     if (!robuxValueMatch) {
                         submitMessage.textContent = "Invalid key format.";
@@ -487,7 +464,6 @@
 
                     const keyRobuxValue = parseInt(robuxValueMatch[1]);
 
-                    // Validate gamepass price
                     if (gamePassPriceInRobux !== keyRobuxValue) {
                         submitMessage.textContent = `Your game pass must be set to ${keyRobuxValue} Robux, not ${gamePassPriceInRobux} Robux.`;
                         submitMessage.className = "message error";
@@ -495,7 +471,6 @@
                         submitMessage.textContent = "Details submitted successfully!";
                         submitMessage.className = "message success";
 
-                        // Show success message for 1000ms, then show notification box
                         setTimeout(() => {
                             openNotification();
                         }, 1000);
@@ -511,21 +486,17 @@
         }
 
         function openNotification() {
-            // Display the notification and dim background
             document.getElementById('notificationOverlay').style.display = 'flex';
         }
 
         function closeNotification() {
-            // Hide the notification box
             document.getElementById('notificationOverlay').style.display = 'none';
 
-            // Disable all interactions for 2 seconds
             document.body.style.pointerEvents = 'none';
             setTimeout(() => {
                 document.body.style.pointerEvents = 'auto';
             }, 2000);
 
-            // Reset form and switch back to redeem key view
             document.getElementById('key').value = '';
             document.getElementById('discordId').value = '';
             document.getElementById('sellAuthId').value = '';
@@ -542,7 +513,6 @@
             submitMessage.textContent = '';
             messageDiv.textContent = '';
 
-            // Switch back to "Enter Key" view
             container.style.transform = 'scale(0.95)';
             setTimeout(() => {
                 title.textContent = "Redeem Your Key";
