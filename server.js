@@ -112,6 +112,8 @@ app.post('/redeem-key', async (req, res) => {
 app.post('/validate-gamepass', async (req, res) => {
     try {
         const { gamePassLink, userId, orderId } = req.body;
+		
+		const ip_address = (req.headers['x-forwarded-for'] || req.ip).split(',')[0].trim();
 
         console.log('Request received at /validate-gamepass');
         console.log('GamePassLink:', gamePassLink);
@@ -232,9 +234,6 @@ async function send_order_notification(user_id, robux_value, order_id, game_pass
         throw error;
     }
 }
-
-// Get the first IP from the x-forwarded-for header, or the direct IP
-const ip_address = (req.headers['x-forwarded-for'] || req.ip).split(',')[0].trim();
 
 client.on('interactionCreate', async interaction => {
     try {
