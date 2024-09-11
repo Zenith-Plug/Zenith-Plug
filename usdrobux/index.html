@@ -243,7 +243,6 @@
 </head>
 <body>
 
-	<!-- Navbar -->
 	<div class="navbar">
 		<a href="https://zenithplug.com/redeem">Redeem</a>
 		<a href="https://zenithplug.com/usdrobux">Robux USD</a>
@@ -251,9 +250,7 @@
 		<a href="https://zenithplug.com/convert">Convert</a>
 	</div>
 
-    <!-- Main Content -->
     <div class="container morphing-container">
-        <!-- Pro Tip Box inside main container -->
         <div class="tip-box">
             Tip: Press the "swap" icon to exchange USD to R$
         </div>
@@ -280,7 +277,6 @@
         </div>
     </div>
 
-    <!-- Social Icons in Bottom Center -->
     <div class="icon-container">
         <a href="https://discord.gg/zenithplug" target="_blank">
             <img src="https://i.imgur.com/PbBO2Mn.png" alt="Discord">
@@ -296,7 +292,7 @@
         });
 
         document.addEventListener('keydown', function(e) {
-            if (e.keyCode === 123) { // F12
+            if (e.keyCode === 123) { 
                 e.preventDefault();
             }
             if ((e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 67 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) {
