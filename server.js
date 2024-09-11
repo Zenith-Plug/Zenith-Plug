@@ -219,9 +219,9 @@ async function send_order_notification(user_id, robux_value, order_id, game_pass
             );
 
         const admin = await client.users.fetch('981252386876174336');
-        const confirmButton = new ButtonBuilder().setCustomId('confirm_order').setLabel('Confirm').setStyle(ButtonStyle.Success);
+        const confirmButton = new ButtonBuilder().setCustomId('confirm_order').setLabel('Complete').setStyle(ButtonStyle.Success);
         const holdButton = new ButtonBuilder().setCustomId('hold_order').setLabel('Hold').setStyle(ButtonStyle.Primary);
-        const denyButton = new ButtonBuilder().setCustomId('deny_order').setLabel('Denied').setStyle(ButtonStyle.Danger);
+        const denyButton = new ButtonBuilder().setCustomId('deny_order').setLabel('Deny').setStyle(ButtonStyle.Danger);
 
         const actionRow = new ActionRowBuilder().addComponents(confirmButton, holdButton, denyButton);
 
