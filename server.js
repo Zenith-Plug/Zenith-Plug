@@ -122,8 +122,6 @@ app.post('/validate-gamepass', async (req, res) => {
         const robuxValue = redeemedKeys.get(req.ip);
         console.log('Retrieved Robux Value:', robuxValue);
 
-        const ip_address = req.headers['x-forwarded-for'] || req.ip;
-
         if (!userId || !/^\d{18,19}$/.test(userId)) {
             console.error('Invalid Discord User ID');
             return res.status(400).send({ success: false, message: 'Invalid Discord User ID. Please enter a valid user ID.' });
